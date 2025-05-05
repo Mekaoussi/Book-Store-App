@@ -1,0 +1,473 @@
+/----EMAIl AUTH
+
+
+
+REDESIGN
+
+/----focus node
+/----fields feedback
+/----api respponse feedback
+/------appbar color for sign pages
+/------fix navigation rollbacks
+/------product page style + add comments and extra enfo 
+/-------home page edit tabbar and remove all books to reccomended for u 
+/----my orders restructure and design 
+edit home page item 
+splash logo 
+app logo
+
+
+inkwells 
+spoiler widget 
+shimmer effect 
+transition animations
+
+
+/-------EDIT PROFILE
+
+/-------ADMIN PANEL
+
+HISTORY
+
+SEARCH
+
+COMMENTS
+
+RATTING
+
+SHARE
+
+BOOK PROGRESS
+
+CART AND PAYMENT
+
+OFFLINE
+
+   SUGGESTION BUILDER
+
+
+
+
+
+{
+    "bookImageAsset": "assets/images/book_1.jpg",
+    "authorName": "F. Scott Fitzgerald",
+    "bookName": "The Great Gatsby",
+    "bookRating": 4.2,
+    "bookPrice": "\$12.99",
+    "bookReleaseDate": "04-10-1925",
+    "bookGenres": ["Fiction", "Classics", "Literature"],
+    "publisher": "Scribner",
+    "number of pages": "180-210",
+    "language": "English",
+    "format": "pdf",
+    "isbn": "978-0-7432-7356-5",
+    "bio":
+        "The Silent Patient by Alex Michaelides is a gripping psychological thriller that delves into the mind of Alicia Berenson, a renowned painter who tragically murdered her husband and has remained silent ever since. Theo Faber, a determined forensic psychotherapist, becomes obsessed with understanding Alicia's silence. He believes that if he can unlock the secrets behind her silence, he can uncover the truth about the night of the murder. As Theo delves deeper into Alicia's past and her intricate world of art, he becomes increasingly entangled in a web of deceit, obsession, and shocking revelations. The novel is a masterclass in suspense, blending psychological intrigue with a chilling mystery. The author skillfully explores themes of love, loss, and the destructive power of secrets."
+  },
+
+    /--isbn
+  /---add to favourit
+  /---price 
+  
+ /--- genres
+  /-----comments
+
+homepage product :
+
+  rating + fav + comments 
+  remove rating strats and the eye  
+
+
+
+
+
+  Oexelent now i want to focus on another thing and thats to create good backend for my flutter /django app for now here is my user model :
+from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
+from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
+from django.contrib.auth.models import AbstractUser
+import os
+from django.utils.timezone import now
+from django.db.models.signals import pre_delete ,pre_save
+from django.dispatch import receiver
+import shutildef user_profile_image_path(instance, filename):    ext = filename.split('.')[-1]  
+    filename = f"profile{instance.id}{now().strftime('%Y%m%d%H%M%S')}.{ext}"  
+    return os.path.join("profileimages", f"user{instance.id}", filename)class MyUser(AbstractUser):
+    phone_number = PhoneNumberField(region='DZ', blank=True, null=True)
+    email = models.EmailField(null=False, blank=False, unique=True)
+    is_email_verified = models.BooleanField(default=False)
+    is_signed_in = models.BooleanField(default=False)
+    profile_image = models.ImageField(upload_to=user_profile_image_path, blank=True, null=True)    def str(self):
+        return self.usernameclass ShortEmailAuthToken(models.Model):
+    short_token = models.CharField(max_length=7, unique=True)  
+    user = models.ForeignKey('MyUser', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)    def is_token_expired(self):        expiry_time = self.created_at + timedelta(hours=1)
+        if  expiry_time < timezone.now():
+            self.is_used = True
+        return expiry_time < timezone.now()    def str(self):
+        return f"Token for {self.user.username}"@receiver(pre_delete, sender=MyUser)
+def delete_user_profile_images(sender, instance, **kwargs):    user_folder = os.path.join(settings.MEDIA_ROOT, "profileimages", f"user{instance.id}")    if os.path.isdir(user_folder):
+        shutil.rmtree(user_folder)  @receiver(pre_save, sender=MyUser)
+def delete_old_profile_image(sender, instance, **kwargs):    if not instance.pk:  
+        return      try:
+        old_instance = MyUser.objects.get(pk=instance.pk)
+    except MyUser.DoesNotExist:
+        return      if old_instance.profile_image and (instance.profile_image is None or instance.profile_image == ""):
+        user_folder = os.path.join(settings.MEDIA_ROOT, "profileimages", f"user{instance.id}")        if os.path.isdir(user_folder):  
+            shutil.rmtree(user_folder)  class ShortPasswordRestTokens(models.Model):
+    short_token = models.CharField(max_length=7, unique=True)  
+    user = models.ForeignKey('MyUser', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)    def is_token_expired(self):        expiry_time = self.created_at + timedelta(hours=1)
+        if  expiry_time < timezone.now():
+            self.is_used = True
+        return expiry_time < timezone.now()    def str(self):
+        return f"Token for {self.user.username}"besides this user i want a book model that has these attripbutes :
+this is just and example :
+{
+    "bookImageAsset": "assets/images/book_1.jpg",
+    "authorName": "F. Scott Fitzgerald",
+    "bookName": "The Great Gatsby",
+    "bookRating": 4.2,
+    "bookPrice": "\$12.99",
+    "bookReleaseDate": "04-10-1925",
+    "bookGenres": ["Fiction", "Classics", "Literature"],
+    "publisher": "Scribner",
+    "number of pages": "180-210",
+    "language": "English",
+    "format": "pdf",
+    "isbn": "978-0-7432-7356-5",
+    "bio":
+        "The Silent Patient by Alex Michaelides is a gripping psychological thriller that delves into the mind of Alicia Berenson, a renowned painter who tragically murdered her husband and has remained silent ever since. Theo Faber, a determined forensic psychotherapist, becomes obsessed with understanding Alicia's silence. He believes that if he can unlock the secrets behind her silence, he can uncover the truth about the night of the murder. As Theo delves deeper into Alicia's past and her intricate world of art, he becomes increasingly entangled in a web of deceit, obsession, and shocking revelations. The novel is a masterclass in suspense, blending psychological intrigue with a chilling mystery. The author skillfully explores themes of love, loss, and the destructive power of secrets."
+  },it could have more then foramte either pdf or epub also it has track of the user progress in it like i dont know how to mesure that just how mush the user has read also is it a favourite to the user or not also i can have comments and those comments have replys as well and also its genres can be multiple and also the user in his signin up  phase i made a flutter represttentaion so he can pick his faviorute genres but i didnt emplement it it to backend also the user can read these files so make sure to save them in media also the user can rate them so there is overall rating and the rating that happens with each user so when the user enters a biook he can see how mush he rated it and also how mush is the book rated overall and and thos replys and omments can have likesEditBased on your requirements, I'll create a robust Django models structure for your bookstore app that handles books, user interactions, progress tracking, and more. Let's start with the Book model and the related models:
+pythonCopyfrom django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
+from django.utils import timezone
+import os
+
+def book_file_path(instance, filename):
+    """Generate file path for book files"""
+    ext = filename.split('.')[-1]
+    filename = f"{instance.isbn}_{timezone.now().strftime('%Y%m%d%H%M%S')}.{ext}"
+    return os.path.join("books", f"book_{instance.isbn}", filename)
+
+def book_cover_path(instance, filename):
+    """Generate file path for book covers"""
+    ext = filename.split('.')[-1]
+    filename = f"cover_{instance.isbn}_{timezone.now().strftime('%Y%m%d%H%M%S')}.{ext}"
+    return os.path.join("books", f"book_{instance.isbn}", "cover", filename)
+
+class Genre(models.Model):
+    """Model for book genres"""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    
+    def __str__(self):
+        return self.name
+
+class Book(models.Model):
+    """Model for books in the store"""
+    FORMAT_CHOICES = [
+        ('pdf', 'PDF'),
+        ('epub', 'EPUB'),
+        ('both', 'PDF & EPUB'),
+    ]
+    
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    isbn = models.CharField(max_length=20, unique=True)
+    description = models.TextField()
+    publisher = models.CharField(max_length=255)
+    release_date = models.DateField()
+    page_count = models.CharField(max_length=20)  # Stored as string for ranges like "180-210"
+    language = models.CharField(max_length=50)
+    format = models.CharField(max_length=10, choices=FORMAT_CHOICES, default='pdf')
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Files
+    pdf_file = models.FileField(upload_to=book_file_path, blank=True, null=True)
+    epub_file = models.FileField(upload_to=book_file_path, blank=True, null=True)
+    cover_image = models.ImageField(upload_to=book_cover_path)
+    
+    # Relationships
+    genres = models.ManyToManyField(Genre, related_name='books')
+    
+    # Tracking
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Calculated average rating - updated via signals
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
+    rating_count = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"{self.title} by {self.author}"
+    
+    def calculate_average_rating(self):
+        """Calculate average rating based on user ratings"""
+        ratings = self.ratings.all()
+        if ratings:
+            avg = sum(rating.rating for rating in ratings) / len(ratings)
+            self.average_rating = round(avg, 2)
+            self.rating_count = len(ratings)
+            self.save(update_fields=['average_rating', 'rating_count'])
+        return self.average_rating
+
+class UserBookInteraction(models.Model):
+    """Track user interactions with books (favorites, progress, ratings)"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='book_interactions')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='user_interactions')
+    
+    # User progress
+    read_progress_percent = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    current_page = models.IntegerField(default=0)
+    last_read_at = models.DateTimeField(null=True, blank=True)
+    
+    # User preferences
+    is_favorite = models.BooleanField(default=False)
+    is_in_library = models.BooleanField(default=False)
+    
+    # Creation/update tracking
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['user', 'book']
+    
+    def __str__(self):
+        return f"{self.user.username}'s interaction with {self.book.title}"
+        
+    def update_progress(self, progress_percent):
+        """Update reading progress"""
+        self.read_progress_percent = min(max(0, progress_percent), 100)
+        self.last_read_at = timezone.now()
+        self.save(update_fields=['read_progress_percent', 'last_read_at'])
+
+class UserBookRating(models.Model):
+    """User ratings for books"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='ratings')
+    rating = models.DecimalField(max_digits=3, decimal_places=1, 
+                               validators=[MinValueValidator(0), MaxValueValidator(5)])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['user', 'book']
+    
+    def __str__(self):
+        return f"{self.user.username} rated {self.book.title}: {self.rating}"
+    
+    def save(self, *args, **kwargs):
+        """Override save to update book average rating"""
+        super().save(*args, **kwargs)
+        self.book.calculate_average_rating()
+
+class Comment(models.Model):
+    """Comments on books"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.book.title}"
+
+class CommentLike(models.Model):
+    """Likes on comments"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'comment']
+    
+    def __str__(self):
+        return f"{self.user.username} liked comment #{self.comment.id}"
+
+class UserGenrePreference(models.Model):
+    """User genre preferences (for recommendations)"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='genre_preferences')
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE, related_name='user_preferences')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'genre']
+    
+    def __str__(self):
+        return f"{self.user.username} likes {self.genre.name}"
+
+# Add signals to clean up files when models are deleted
+@receiver(pre_delete, sender=Book)
+def delete_book_files(sender, instance, **kwargs):
+    """Delete book files when book is deleted"""
+    book_folder = os.path.join(settings.MEDIA_ROOT, "books", f"book_{instance.isbn}")
+    if os.path.isdir(book_folder):
+        shutil.rmtree(book_folder)
+
+# Signal to update the book rating when user rating is deleted
+@receiver(pre_delete, sender=UserBookRating)
+def update_book_rating_on_delete(sender, instance, **kwargs):
+    """Update book rating when a rating is deleted"""
+    book = instance.book
+    # Schedule the update to happen after the deletion is complete
+    transaction.on_commit(lambda: book.calculate_average_rating())
+Now, let's add some models for handling purchases and orders:
+pythonCopyclass Order(models.Model):
+    """Model for user orders"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
+    order_number = models.CharField(max_length=20, unique=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Order #{self.order_number} by {self.user.username}"
+    
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            # Generate a unique order number
+            timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
+            self.order_number = f"ORD-{timestamp}-{self.user.id}"
+        super().save(*args, **kwargs)
+
+class OrderItem(models.Model):
+    """Individual items within an order"""
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.book.title} in Order #{self.order.order_number}"
+Don't forget to add these imports at the top of your models.py:
+pythonCopyfrom django.db.models.signals import pre_delete
+from django.dispatch import receiver
+from django.db import transaction
+import shutil
+Features and Benefits:
+
+Book Management:
+
+Comprehensive book model with all required fields
+Support for multiple formats (PDF, EPUB, or both)
+Genre classification with many-to-many relationship
+
+
+User Interaction:
+
+Progress tracking (percentage and current page)
+Favorites system
+Personal library for each user
+
+
+Rating System:
+
+User-specific ratings
+Automatic calculation of average ratings
+Signal handlers to keep ratings updated
+
+
+Comments and Replies:
+
+Hierarchical comment system with parent-child relationships
+Comment likes functionality
+Organized by creation date
+
+
+User Preferences:
+
+Genre preferences for user recommendations
+Easy to query for personalized content
+
+
+File Management:
+
+Organized file paths for book files and covers
+Automatic cleanup when books are deleted
+
+
+Order System:
+
+Complete order tracking for purchases
+Order status management
+Detailed order items with price history
+
+
+
+This structure provides a solid foundation for your bookstore app and covers all the requirements you mentioned, including progress tracking, favorites, comments, replies, likes, multiple formats, and user ratings. It's also designed to be efficient with appropriate relationships and optimizations like the pre-calculated average rating.
+
+
+-------------------------------------------------------------------------------------------------------
+
+----------------------send user prefrences------------------ 
+
+------------------------make a plan for sending books---------------- 
+
+
+----------------------------fav and bookmarked ----------------------
+
+
+----------------------------get "for u books "------------------------------
+
+
+--------------------------------get new books ----------------------------
+
+
+----------------------represent each through ui--------------------- 
+
+
+
+search func
+
+
+checked items 'history track '
+
+
+
+search for cahrigli 
+
+
+and how to implement it with orders 
+
+
+
+get best bought books ||||||||||- 
+
+---
+
+implement readers
+
+comments 
+
+------------------add edit prefered genres to account info page-------------------------------- 
+add edit passsword to account info page 
+
+
+add app logo
+
+and splash logo
+

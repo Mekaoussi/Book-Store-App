@@ -1,0 +1,37 @@
+@startuml iDoom Bookstore - User Management
+
+skinparam actorStyle awesome
+skinparam usecaseArrowColor #0077B6
+skinparam usecaseBorderColor #0077B6
+skinparam usecaseBackgroundColor #F0F8FF
+skinparam linetype polyline
+
+left to right direction
+
+actor "User" as User
+actor "Administrator" as Admin
+
+rectangle "User Management" {
+  usecase "Register" as UC1
+  usecase "Login" as UC2
+  usecase "Select Preferred Genres" as UC3
+  usecase "Manage Profile" as UC4
+  usecase "Change Password" as UC5
+  usecase "Update Profile Picture" as UC6
+  usecase "Manage Users" as UC7
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+
+Admin --> UC2
+Admin --> UC7
+
+note bottom of UC1: Email verification with short tokens
+note bottom of UC3: ManyToMany relationship between users and genres
+
+@enduml

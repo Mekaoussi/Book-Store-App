@@ -1,0 +1,126 @@
+@startuml iDoom Bookstore - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classFontSize 14
+skinparam classBackgroundColor #E8ECF0
+skinparam classBorderColor #9A31F7
+skinparam arrowColor #984878
+skinparam packageBackgroundColor #FFFFFF
+
+package "User Management" {
+  class MyUser {
+     username: CharField
+     email: EmailField
+     first_name: CharField
+     last_name: CharField
+     phone_number: PhoneNumberField
+     is_email_verified: BooleanField
+     profile_image: ImageField
+     preferred_genres: ManyToManyField
+  }
+
+  class ShortEmailAuthToken {
+     short_token: CharField
+     user: ForeignKey
+     created_at: DateTimeField
+     is_used: BooleanField
+     is_token_expired(): Boolean
+  }
+
+  class ShortPasswordRestTokens {
+     short_token: CharField
+     user: ForeignKey
+     created_at: DateTimeField
+     is_used: BooleanField
+     is_token_expired(): Boolean
+  }
+}
+
+package "Book Management" {
+  class Genre {
+     name: CharField
+  }
+
+  class Book {
+     title: CharField
+     author: CharField
+     isbn: CharField
+     description: TextField
+     total_rating: FloatField
+     ratings_count: IntegerField
+     pdf_file: FileField
+     epub_file: FileField
+     cover_image: ImageField
+     price: DecimalField
+     page_count: PositiveIntegerField
+     publication_date: DateField
+     book_language: CharField
+     publisher: CharField
+     created_at: DateTimeField
+     genres: ManyToManyField
+     update_rating(): void
+  }
+}
+
+package "User Interactions" {
+  class UserBookInteraction {
+     user: ForeignKey
+     book: ForeignKey
+     read_progress_percent: IntegerField
+     current_page: IntegerField
+     last_read_at: DateTimeField
+     is_favorite: BooleanField
+     is_in_library: BooleanField
+     is_paid: BooleanField
+     created_at: DateTimeField
+     updated_at: DateTimeField
+     rating: FloatField
+  }
+
+  class Comment {
+     user: ForeignKey
+     book: ForeignKey
+     parent: ForeignKey
+     content: TextField
+     created_at: DateTimeField
+  }
+}
+
+package "Purchase System" {
+  class CartOrder {
+     user: ForeignKey
+     order_number: CharField
+     total_amount: DecimalField
+     status: CharField
+     payment_method: CharField
+     created_at: DateTimeField
+     updated_at: DateTimeField
+  }
+
+  class CartOrderItem {
+     order: ForeignKey
+     book: ForeignKey
+     price: DecimalField
+     created_at: DateTimeField
+  }
+}
+
+' Relationships
+MyUser "1" -- "0..*" ShortEmailAuthToken
+MyUser "1" -- "0..*" ShortPasswordRestTokens
+MyUser "1" -- "0..*" UserBookInteraction
+MyUser "1" -- "0..*" Comment
+MyUser "1" -- "0..*" CartOrder
+MyUser "0..*" -- "0..*" Genre : preferred_genres
+
+Book "1" -- "0..*" UserBookInteraction
+Book "1" -- "0..*" Comment
+Book "1" -- "0..*" CartOrderItem
+Book "0..*" -- "0..*" Genre
+
+CartOrder "1" -- "0..*" CartOrderItem
+
+Comment "0..1" -- "0..*" Comment : parent/replies
+
+@enduml

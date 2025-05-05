@@ -1,0 +1,39 @@
+@startuml iDoom Bookstore - Purchase System
+
+skinparam actorStyle awesome
+skinparam usecaseArrowColor #0077B6
+skinparam usecaseBorderColor #0077B6
+skinparam usecaseBackgroundColor #F0F8FF
+skinparam linetype polyline
+
+left to right direction
+
+actor "User" as User
+actor "Payment System\n(Chargily)" as PaymentSystem
+
+rectangle "Purchase System" {
+  usecase "View Book Details" as UC1
+  usecase "Add to Cart" as UC2
+  usecase "View Cart" as UC3
+  usecase "Modify Cart" as UC4
+  usecase "Place Order" as UC5
+  usecase "Process Payment" as UC6
+  usecase "View Order History" as UC7
+  usecase "Download Purchased Books" as UC8
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC7
+User --> UC8
+
+PaymentSystem --> UC6
+
+note bottom of UC2: Implemented with CartProvider
+note bottom of UC6: WebView integration for Chargily
+note bottom of UC7: Displays order history
+
+@enduml
